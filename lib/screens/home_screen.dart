@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'login_screen.dart';
 import 'profile_screen.dart';
 import 'settings_screen.dart';
+import 'advanced_expense_list_screen.dart'; // ✅ tambahkan import expense
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -84,6 +85,18 @@ class HomeScreen extends StatelessWidget {
                 );
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.money),
+              title: const Text('Expense'),
+              onTap: () {
+                Navigator.pop(context); // tutup drawer dulu
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const AdvancedExpenseListScreen()),
+                );
+              },
+            ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.logout),
@@ -123,7 +136,7 @@ class HomeScreen extends StatelessWidget {
                   _buildDashboardCard('Profile', Icons.person, Colors.green, context),
                   _buildDashboardCard('Messages', Icons.message, Colors.orange, context),
                   _buildDashboardCard('Settings', Icons.settings, Colors.purple, context),
-                  _buildDashboardCard('Help', Icons.help, Colors.red, context),
+                  _buildDashboardCard('Expense', Icons.money, Colors.red, context), // ✅ ditambahkan
                 ],
               ),
             ),
@@ -133,7 +146,8 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDashboardCard(String title, IconData icon, Color color, BuildContext context) {
+  Widget _buildDashboardCard(
+      String title, IconData icon, Color color, BuildContext context) {
     return Card(
       elevation: 4,
       child: InkWell(
@@ -147,6 +161,12 @@ class HomeScreen extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const SettingsScreen()),
+            );
+          } else if (title == 'Expense') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const AdvancedExpenseListScreen()),
             );
           } else {
             // Bisa diisi navigasi lain
