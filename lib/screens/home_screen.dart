@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+import 'advanced_expense_list_screen.dart';
+import 'category_screen.dart';   // Category Management
 import 'login_screen.dart';
 import 'profile_screen.dart';
 import 'settings_screen.dart';
-import 'advanced_expense_list_screen.dart'; // ✅ tambahkan import expense
+import 'statistics_screen.dart'; // Statistics
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -17,7 +19,6 @@ class HomeScreen extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () {
-              // Logout dari AppBar
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -32,13 +33,11 @@ class HomeScreen extends StatelessWidget {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            DrawerHeader(
-              decoration: const BoxDecoration(
-                color: Colors.blue,
-              ),
+            const DrawerHeader(
+              decoration: BoxDecoration(color: Colors.blue),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                children: [
                   CircleAvatar(
                     radius: 30,
                     backgroundColor: Colors.white,
@@ -59,15 +58,12 @@ class HomeScreen extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.home),
               title: const Text('Home'),
-              onTap: () {
-                Navigator.pop(context); // hanya tutup drawer
-              },
+              onTap: () => Navigator.pop(context),
             ),
             ListTile(
               leading: const Icon(Icons.person),
               title: const Text('Profile'),
               onTap: () {
-                Navigator.pop(context); // tutup drawer dulu
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const ProfileScreen()),
@@ -78,7 +74,6 @@ class HomeScreen extends StatelessWidget {
               leading: const Icon(Icons.settings),
               title: const Text('Settings'),
               onTap: () {
-                Navigator.pop(context); // tutup drawer dulu
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const SettingsScreen()),
@@ -89,24 +84,29 @@ class HomeScreen extends StatelessWidget {
               leading: const Icon(Icons.money),
               title: const Text('Expense'),
               onTap: () {
-                Navigator.pop(context); // tutup drawer dulu
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => const AdvancedExpenseListScreen()),
+                  MaterialPageRoute(builder: (context) => AdvancedExpenseListScreen()),
                 );
               },
             ),
-            const Divider(),
             ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text('Logout'),
+              leading: const Icon(Icons.category),
+              title: const Text('Category Management'),
               onTap: () {
-                Navigator.pop(context); // tutup drawer dulu
-                Navigator.pushAndRemoveUntil(
+                Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const LoginScreen()),
-                  (route) => false,
+                  MaterialPageRoute(builder: (context) => const CategoryScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.bar_chart),
+              title: const Text('Statistics'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const StatisticsScreen()),
                 );
               },
             ),
@@ -133,10 +133,56 @@ class HomeScreen extends StatelessWidget {
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
                 children: [
-                  _buildDashboardCard('Profile', Icons.person, Colors.green, context),
-                  _buildDashboardCard('Messages', Icons.message, Colors.orange, context),
-                  _buildDashboardCard('Settings', Icons.settings, Colors.purple, context),
-                  _buildDashboardCard('Expense', Icons.money, Colors.red, context), // ✅ ditambahkan
+                  _buildDashboardCard(
+                    context,
+                    'Profile',
+                    Icons.person,
+                    Colors.green,
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                    ),
+                  ),
+                  _buildDashboardCard(
+                    context,
+                    'Settings',
+                    Icons.settings,
+                    Colors.purple,
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                    ),
+                  ),
+                  _buildDashboardCard(
+                    context,
+                    'Expense',
+                    Icons.money,
+                    Colors.red,
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => AdvancedExpenseListScreen()),
+                    ),
+                  ),
+                  _buildDashboardCard(
+                    context,
+                    'Categories',
+                    Icons.category,
+                    Colors.teal,
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const CategoryScreen()),
+                    ),
+                  ),
+                  _buildDashboardCard(
+                    context,
+                    'Statistics',
+                    Icons.bar_chart,
+                    Colors.orange,
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const StatisticsScreen()),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -147,34 +193,16 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildDashboardCard(
-      String title, IconData icon, Color color, BuildContext context) {
+    BuildContext context,
+    String title,
+    IconData icon,
+    Color color,
+    VoidCallback onTap,
+  ) {
     return Card(
       elevation: 4,
       child: InkWell(
-        onTap: () {
-          if (title == 'Profile') {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const ProfileScreen()),
-            );
-          } else if (title == 'Settings') {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const SettingsScreen()),
-            );
-          } else if (title == 'Expense') {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const AdvancedExpenseListScreen()),
-            );
-          } else {
-            // Bisa diisi navigasi lain
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('$title clicked')),
-            );
-          }
-        },
+        onTap: onTap,
         child: Container(
           padding: const EdgeInsets.all(16),
           child: Column(
