@@ -5,8 +5,8 @@ class AddExpenseScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _titleController = TextEditingController();
-    final _amountController = TextEditingController();
+    final titleController = TextEditingController();
+    final amountController = TextEditingController();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Tambah Pengeluaran')),
@@ -15,11 +15,11 @@ class AddExpenseScreen extends StatelessWidget {
         child: Column(
           children: [
             TextField(
-              controller: _titleController,
+              controller: titleController,
               decoration: const InputDecoration(labelText: 'Judul'),
             ),
             TextField(
-              controller: _amountController,
+              controller: amountController,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(labelText: 'Jumlah'),
             ),
