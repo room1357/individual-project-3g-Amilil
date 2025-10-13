@@ -62,7 +62,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              initialValue: _selectedCategory,
+              value: _selectedCategory,
               items: categories.map((cat) {
                 return DropdownMenuItem(value: cat, child: Text(cat));
               }).toList(),
@@ -83,18 +83,20 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
             ElevatedButton(
               onPressed: () {
                 final updatedExpense = Expense(
+                  id: widget.expense.id, // ✅ tambahkan ini agar tidak error
                   title: _titleController.text,
                   description: _descController.text,
                   category: _selectedCategory,
                   amount: double.tryParse(_amountController.text) ?? 0,
                   date: DateTime.now(),
                 );
+
                 widget.onSave(widget.index, updatedExpense);
                 Navigator.pop(context);
               },
               style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
               child: const Text("Simpan Perubahan"),
-            )
+            ),
           ],
         ),
       ),
