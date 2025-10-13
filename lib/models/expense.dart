@@ -1,4 +1,5 @@
 class Expense {
+  final String id;
   final String title;
   final String description;
   final String category;
@@ -6,6 +7,7 @@ class Expense {
   final DateTime date;
 
   Expense({
+    required this.id,
     required this.title,
     required this.description,
     required this.category,
