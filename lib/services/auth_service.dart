@@ -2,8 +2,8 @@
 import '../models/user.dart';
 
 class AuthService {
-  // Simulasi penyimpanan user di memori sementara
-  static final List<User> _registeredUsers = [];
+  // 🔹 Gabungkan user dummy dari userList + user baru yang diregistrasi
+  static final List<User> _registeredUsers = [...userList];
 
   static User? _currentUser;
 
@@ -14,12 +14,11 @@ class AuthService {
     required String username,
     required String password,
   }) {
-    // Cek apakah username sudah dipakai
-    final existingUser =
-        _registeredUsers.any((user) => user.username == username);
+    // Cek apakah username sudah digunakan
+    final existingUser = _registeredUsers.any((user) => user.username == username);
 
     if (existingUser) {
-      return false; // gagal, username sudah digunakan
+      return false; // Gagal karena username sudah ada
     }
 
     // Tambahkan user baru
@@ -36,7 +35,7 @@ class AuthService {
     return true;
   }
 
-  /// Login user
+  /// Login user dari daftar user yang sudah ada (termasuk userList)
   static bool login(String username, String password) {
     try {
       final user = _registeredUsers.firstWhere(
@@ -45,7 +44,7 @@ class AuthService {
       _currentUser = user;
       return true;
     } catch (e) {
-      return false; // user tidak ditemukan
+      return false; // Username atau password salah
     }
   }
 

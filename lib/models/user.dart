@@ -1,3 +1,5 @@
+import 'package:uuid/uuid.dart';
+
 class User {
   final String id;
   final String fullName;
@@ -35,3 +37,34 @@ class User {
     };
   }
 }
+
+// ==========================================================
+// 🔸 Data user dummy (multi user support)
+// ==========================================================
+
+// Gunakan Uuid agar id selalu unik
+const _uuid = Uuid();
+
+final List<User> userList = [
+  User(
+    id: _uuid.v4(),
+    fullName: 'User Dummy 1',
+    email: 'user1@example.com',
+    username: 'user1',
+    password: 'password1',
+  ),
+  User(
+    id: _uuid.v4(),
+    fullName: 'User Dummy 2',
+    email: 'user2@example.com',
+    username: 'user2',
+    password: 'password2',
+  ),
+  User(
+    id: _uuid.v4(),
+    fullName: 'Admin Account',
+    email: 'admin@example.com',
+    username: 'admin',
+    password: 'admin123',
+  ),
+];
