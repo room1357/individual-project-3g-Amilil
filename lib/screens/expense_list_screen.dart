@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../models/expense.dart';
 import '../routes/app_routes.dart';
+import '../services/auth_service.dart';
+import '../services/expense_service.dart';
+import 'edit_expense_screen.dart';
 
 class ExpenseListScreen extends StatefulWidget {
   const ExpenseListScreen({super.key});
@@ -10,40 +14,56 @@ class ExpenseListScreen extends StatefulWidget {
 }
 
 class _ExpenseListScreenState extends State<ExpenseListScreen> {
-  // Dummy data sementara (bisa diganti ambil dari service)
-  final List<Expense> _expenses = [
-    Expense(
-      id: '1',
-      title: 'Makan Siang',
-      amount: 25000,
-      category: 'Makanan',
-      date: DateTime(2025, 10, 10),
-      description: 'Nasi goreng dan es teh',
-    ),
-    Expense(
-      id: '2',
-      title: 'Transportasi',
-      amount: 10000,
-      category: 'Transportasi',
-      date: DateTime(2025, 10, 11),
-      description: 'Naik ojek ke kampus',
-    ),
-  ];
+  List<Expense> _expenses = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadExpenses();
+  }
+
+  void _loadExpenses() {
+    setState(() {
+      _expenses = ExpenseService.getAll();
+    });
+  }
 
   double get totalExpense =>
       _expenses.fold(0, (sum, e) => sum + e.amount);
 
+  void _goToAddExpense() async {
+    await Navigator.pushNamed(context, AppRoutes.addExpense);
+    _loadExpenses(); // refresh setelah kembali
+  }
+
+  void _goToEditExpense(int index) async {
+    final expense = _expenses[index];
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditExpenseScreen(
+          expense: expense,
+          index: index,
+          onSave: (i, updatedExpense) {
+            ExpenseService.updateExpense(i, updatedExpense);
+            _loadExpenses();
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final user = AuthService.currentUser;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Daftar Pengeluaran'),
+        title: Text('Pengeluaran ${user?.username ?? ""}'),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () {
-              Navigator.pushNamed(context, AppRoutes.addExpense);
-            },
+            onPressed: _goToAddExpense,
           ),
         ],
       ),
@@ -51,14 +71,24 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
         children: [
           _buildSummaryCard(),
           Expanded(
-            child: ListView.separated(
-              itemCount: _expenses.length,
-              separatorBuilder: (context, index) => const Divider(),
-              itemBuilder: (context, index) {
-                final expense = _expenses[index];
-                return ExpenseItem(expense: expense);
-              },
-            ),
+            child: _expenses.isEmpty
+                ? const Center(
+                    child: Text(
+                      "Belum ada pengeluaran",
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  )
+                : ListView.separated(
+                    itemCount: _expenses.length,
+                    separatorBuilder: (context, index) => const Divider(),
+                    itemBuilder: (context, index) {
+                      final expense = _expenses[index];
+                      return ExpenseItem(
+                        expense: expense,
+                        onTap: () => _goToEditExpense(index),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -93,10 +123,12 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
   }
 }
 
-// ✅ Komponen untuk menampilkan satu item pengeluaran
+// ✅ Widget satuan item pengeluaran
 class ExpenseItem extends StatelessWidget {
   final Expense expense;
-  const ExpenseItem({super.key, required this.expense});
+  final VoidCallback? onTap;
+
+  const ExpenseItem({super.key, required this.expense, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -108,18 +140,13 @@ class ExpenseItem extends StatelessWidget {
         style: const TextStyle(fontSize: 12),
       ),
       trailing: Text(
-        'Rp ${expense.amount.toStringAsFixed(0)}',
+        expense.formattedAmount,
         style: const TextStyle(
           color: Colors.black87,
           fontWeight: FontWeight.bold,
         ),
       ),
-      onTap: () {
-        // contoh: nanti bisa diarahkan ke edit expense
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Detail: ${expense.title}')),
-        );
-      },
+      onTap: onTap,
     );
   }
 }

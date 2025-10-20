@@ -1,5 +1,4 @@
-import 'package:uuid/uuid.dart';
-
+// lib/models/user.dart
 class User {
   final String id;
   final String fullName;
@@ -42,26 +41,24 @@ class User {
 // 🔸 Data user dummy (multi user support)
 // ==========================================================
 
-// Gunakan Uuid agar id selalu unik
-const _uuid = Uuid();
-
+// Gunakan ID statis agar tidak berubah setiap rebuild
 final List<User> userList = [
   User(
-    id: _uuid.v4(),
+    id: 'u1', // ✅ ID tetap
     fullName: 'User Dummy 1',
     email: 'user1@example.com',
     username: 'user1',
     password: 'password1',
   ),
   User(
-    id: _uuid.v4(),
+    id: 'u2', // ✅ ID tetap
     fullName: 'User Dummy 2',
     email: 'user2@example.com',
     username: 'user2',
     password: 'password2',
   ),
   User(
-    id: _uuid.v4(),
+    id: 'admin', // ✅ ID tetap
     fullName: 'Admin Account',
     email: 'admin@example.com',
     username: 'admin',

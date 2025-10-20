@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-
 import '../managers/expense_manager.dart';
 import '../models/expense.dart';
+import 'package:uuid/uuid.dart';
 
 class AdvancedExpenseListScreen extends StatefulWidget {
   const AdvancedExpenseListScreen({super.key});
@@ -11,12 +11,12 @@ class AdvancedExpenseListScreen extends StatefulWidget {
       _AdvancedExpenseListScreenState();
 }
 
-class _AdvancedExpenseListScreenState
-    extends State<AdvancedExpenseListScreen> {
+class _AdvancedExpenseListScreenState extends State<AdvancedExpenseListScreen> {
   late List<Expense> expenses;
   late List<Expense> filteredExpenses;
   String selectedCategory = 'Semua';
   final TextEditingController searchController = TextEditingController();
+  final uuid = const Uuid();
 
   final List<String> categories = [
     'Semua',
@@ -30,7 +30,7 @@ class _AdvancedExpenseListScreenState
   @override
   void initState() {
     super.initState();
-    expenses = ExpenseManager.expenses; // pastikan managers/expense_manager.dart ada
+    expenses = List<Expense>.from(ExpenseManager.getUserExpenses());
     filteredExpenses = List<Expense>.from(expenses);
   }
 
@@ -46,6 +46,11 @@ class _AdvancedExpenseListScreenState
       appBar: AppBar(
         title: const Text('Pengeluaran Advanced'),
         backgroundColor: Colors.blue,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showAddExpenseDialog,
+        backgroundColor: Colors.blue,
+        child: const Icon(Icons.add),
       ),
       body: Column(
         children: [
@@ -87,7 +92,7 @@ class _AdvancedExpenseListScreenState
             ),
           ),
 
-          // Statistics summary
+          // Statistik ringkas
           Container(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -100,7 +105,7 @@ class _AdvancedExpenseListScreenState
             ),
           ),
 
-          // Expense list
+          // Daftar pengeluaran
           Expanded(
             child: filteredExpenses.isEmpty
                 ? const Center(child: Text('Tidak ada pengeluaran ditemukan'))
@@ -109,8 +114,8 @@ class _AdvancedExpenseListScreenState
                     itemBuilder: (context, index) {
                       final expense = filteredExpenses[index];
                       return Card(
-                        margin:
-                            const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 4),
                         child: ListTile(
                           leading: CircleAvatar(
                             backgroundColor: _getCategoryColor(expense.category),
@@ -120,7 +125,8 @@ class _AdvancedExpenseListScreenState
                             ),
                           ),
                           title: Text(expense.title),
-                          subtitle: Text('${expense.category} • ${expense.formattedDate}'),
+                          subtitle: Text(
+                              '${expense.category} • ${expense.formattedDate}'),
                           trailing: Text(
                             expense.formattedAmount,
                             style: TextStyle(
@@ -139,6 +145,7 @@ class _AdvancedExpenseListScreenState
     );
   }
 
+  // 🔍 Filter pengeluaran
   void _filterExpenses() {
     final q = searchController.text.toLowerCase();
     setState(() {
@@ -153,11 +160,14 @@ class _AdvancedExpenseListScreenState
     });
   }
 
+  // 🧮 Kartu statistik
   Widget _buildStatCard(String label, String value) {
     return Column(
       children: [
         Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-        Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text(value,
+            style:
+                const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -173,6 +183,7 @@ class _AdvancedExpenseListScreenState
     return 'Rp ${avg.toStringAsFixed(0)}';
   }
 
+  // 🎨 Warna kategori
   Color _getCategoryColor(String category) {
     switch (category) {
       case 'Makanan':
@@ -190,6 +201,7 @@ class _AdvancedExpenseListScreenState
     }
   }
 
+  // 🎯 Ikon kategori
   IconData _getCategoryIcon(String category) {
     switch (category) {
       case 'Makanan':
@@ -207,6 +219,7 @@ class _AdvancedExpenseListScreenState
     }
   }
 
+  // 🔹 Detail pengeluaran
   void _showExpenseDetails(BuildContext context, Expense expense) {
     showDialog(
       context: context,
@@ -227,6 +240,88 @@ class _AdvancedExpenseListScreenState
             onPressed: () => Navigator.pop(context),
             child: const Text("Tutup"),
           )
+        ],
+      ),
+    );
+  }
+
+  // ➕ Tambah pengeluaran baru
+  void _showAddExpenseDialog() {
+    final titleCtrl = TextEditingController();
+    final descCtrl = TextEditingController();
+    String selectedCat = 'Makanan';
+    final amountCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Tambah Pengeluaran"),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleCtrl,
+                decoration: const InputDecoration(labelText: "Judul"),
+              ),
+              TextField(
+                controller: descCtrl,
+                decoration: const InputDecoration(labelText: "Deskripsi"),
+              ),
+              TextField(
+                controller: amountCtrl,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: "Jumlah (Rp)"),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                value: selectedCat,
+                items: categories
+                    .where((c) => c != 'Semua')
+                    .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                    .toList(),
+                onChanged: (val) => selectedCat = val ?? 'Makanan',
+                decoration: const InputDecoration(labelText: "Kategori"),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Batal"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (titleCtrl.text.isEmpty ||
+                  amountCtrl.text.isEmpty ||
+                  double.tryParse(amountCtrl.text) == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Isi data dengan benar")),
+                );
+                return;
+              }
+
+              final newExpense = Expense(
+                id: uuid.v4(),
+                userId: "u1", // nanti bisa diganti AuthService.currentUser!.id
+                title: titleCtrl.text,
+                description: descCtrl.text,
+                category: selectedCat,
+                amount: double.parse(amountCtrl.text),
+                date: DateTime.now(),
+              );
+
+              setState(() {
+                ExpenseManager.addExpense(newExpense);
+                expenses = ExpenseManager.getUserExpenses();
+                filteredExpenses = List<Expense>.from(expenses);
+              });
+
+              Navigator.pop(context);
+            },
+            child: const Text("Simpan"),
+          ),
         ],
       ),
     );

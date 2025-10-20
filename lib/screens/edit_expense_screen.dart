@@ -3,8 +3,8 @@ import '../models/expense.dart';
 
 class EditExpenseScreen extends StatefulWidget {
   final Expense expense;
-  final int index; // untuk identifikasi data mana yang di-edit
-  final Function(int, Expense) onSave; // callback ke parent
+  final int index;
+  final Function(int, Expense) onSave;
 
   const EditExpenseScreen({
     super.key,
@@ -43,10 +43,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Edit Pengeluaran"),
-        backgroundColor: Colors.blue,
-      ),
+      appBar: AppBar(title: const Text("Edit Pengeluaran")),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: ListView(
@@ -63,27 +60,24 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               value: _selectedCategory,
-              items: categories.map((cat) {
-                return DropdownMenuItem(value: cat, child: Text(cat));
-              }).toList(),
-              onChanged: (val) {
-                setState(() {
-                  _selectedCategory = val!;
-                });
-              },
+              items: categories
+                  .map((cat) => DropdownMenuItem(value: cat, child: Text(cat)))
+                  .toList(),
+              onChanged: (val) => setState(() => _selectedCategory = val!),
               decoration: const InputDecoration(labelText: "Kategori"),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _amountController,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: "Jumlah"),
+              decoration: const InputDecoration(labelText: "Jumlah (Rp)"),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 final updatedExpense = Expense(
-                  id: widget.expense.id, // ✅ tambahkan ini agar tidak error
+                  id: widget.expense.id,
+                  userId: widget.expense.userId, // ✅ tetap user yang sama
                   title: _titleController.text,
                   description: _descController.text,
                   category: _selectedCategory,

@@ -1,11 +1,11 @@
-// lib/services/auth_service.dart
+import 'package:uuid/uuid.dart';
+
 import '../models/user.dart';
 
 class AuthService {
-  // 🔹 Gabungkan user dummy dari userList + user baru yang diregistrasi
   static final List<User> _registeredUsers = [...userList];
-
   static User? _currentUser;
+  static final Uuid _uuid = const Uuid(); // ✅ tambahkan ini
 
   /// Register user baru
   static bool register({
@@ -14,16 +14,14 @@ class AuthService {
     required String username,
     required String password,
   }) {
-    // Cek apakah username sudah digunakan
-    final existingUser = _registeredUsers.any((user) => user.username == username);
+    final existingUser =
+        _registeredUsers.any((user) => user.username == username);
 
-    if (existingUser) {
-      return false; // Gagal karena username sudah ada
-    }
+    if (existingUser) return false;
 
-    // Tambahkan user baru
+    // ✅ Gunakan UUID, bukan DateTime
     final newUser = User(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: _uuid.v4(),
       fullName: fullName,
       email: email,
       username: username,
@@ -35,7 +33,6 @@ class AuthService {
     return true;
   }
 
-  /// Login user dari daftar user yang sudah ada (termasuk userList)
   static bool login(String username, String password) {
     try {
       final user = _registeredUsers.firstWhere(
@@ -44,18 +41,13 @@ class AuthService {
       _currentUser = user;
       return true;
     } catch (e) {
-      return false; // Username atau password salah
+      return false;
     }
   }
 
-  /// Logout user
-  static void logout() {
-    _currentUser = null;
-  }
+  static void logout() => _currentUser = null;
 
-  /// Mendapatkan user yang sedang login
   static User? get currentUser => _currentUser;
 
-  /// Mengecek apakah user sedang login
   static bool get isLoggedIn => _currentUser != null;
 }
